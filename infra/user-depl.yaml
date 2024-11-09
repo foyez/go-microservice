@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+  labels:
+    app: user # same pod label name
+spec:
+  selector:
+    matchLabels:
+      app: user # pod label name
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: user # same pod label name
+    spec:
+      containers:
+        - name: user-service
+          image: foyezar/user-service:v1.0
+          ports:
+            - containerPort: 4000
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user # to connect to pod through label
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000

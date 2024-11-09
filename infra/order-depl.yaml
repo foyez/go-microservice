@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deployment
+  labels:
+    app: order # same pod label name
+spec:
+  selector:
+    matchLabels:
+      app: order # pod label name
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: order # same pod label name
+    spec:
+      containers:
+        - name: order-service
+          image: foyezar/order-service:v1.0
+          ports:
+            - containerPort: 6000
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order # to connect to pod through label
+  ports:
+    - protocol: TCP
+      port: 6000
+      targetPort: 30080
