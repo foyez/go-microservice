@@ -1,14 +1,14 @@
 services:
-  broker-service:
-    build:
-      context: ./../broker-service
-      dockerfile: ./../broker-service/Dockerfile
-    restart: always
-    ports:
-      - "8080:80"
-    deploy:
-      mode: replicated
-      replicas: 1
+  # broker-service:
+  #   build:
+  #     context: ./../broker-service
+  #     dockerfile: ./../broker-service/Dockerfile
+  #   restart: always
+  #   ports:
+  #     - "8080:80"
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
 
   rabbitmq:
     image: rabbitmq:3.9-alpine

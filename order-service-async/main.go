@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/foyez/microservice-with-go/user/pb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type Order struct {
@@ -25,39 +24,59 @@ type User struct {
 	Email string `json:"email"`
 }
 
+// getUserDetails returns user details by userID
 func getUserDetails(userID string) (*User, error) {
-	// Set up connection options with insecure credentials (for development/testing purposes)
-	conn, err := grpc.NewClient("localhost:4000",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
-	// Create a new UserService client from the connection
-	client := pb.NewUserServiceClient(conn)
-
-	// Set up a context with a timeout for the gRPC call
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	// Call GetUser method on the client
-	res, err := client.GetUser(ctx, &pb.GetUserRequest{Id: userID})
-	log.Println(userID)
-	log.Println(res)
-	log.Println(err)
+	ch, err := conn.Channel()
 	if err != nil {
 		return nil, err
 	}
-	user := res.User
+	defer ch.Close()
 
-	return &User{ID: user.Id, Name: user.Name, Email: user.Email}, nil
+	msgs, err := ch.Consume(
+		"user_queue",
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set a timeout context for listening to messages
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("No matching user found within timeout.")
+			return nil, errors.New("user not found")
+		case d := <-msgs:
+			var user User
+			if err := json.Unmarshal(d.Body, &user); err != nil {
+				log.Printf("Failed to unmarshal message: %v", err)
+				continue
+			}
+
+			// Check if the user ID matches
+			if user.ID == userID {
+				return &user, nil
+			}
+		}
+	}
 }
 
+// getOrderHandler retrieves a placed order with user details
 func getOrderHandler(w http.ResponseWriter, r *http.Request) {
-	// userID := strings.TrimPrefix(r.URL.Path, "/orders/")
-
 	userID := r.URL.Query().Get("userId")
 
 	if userID == "" {

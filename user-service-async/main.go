@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net"
 
 	"github.com/foyez/microservice-with-go/user/pb"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -15,6 +17,35 @@ import (
 type Server struct {
 	pb.UnimplementedUserServiceServer
 	users map[string]*pb.User
+}
+
+// publishUser publishes a new user to RabbitMQ
+func publishUser(user *pb.User) {
+	conn, _ := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	defer conn.Close()
+
+	ch, _ := conn.Channel()
+	defer ch.Close()
+
+	q, _ := ch.QueueDeclare(
+		"user_queue",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	body, _ := json.Marshal(user)
+	ch.Publish(
+		"",
+		q.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		},
+	)
 }
 
 // CreateUser creates a new user and returns the user details
@@ -30,6 +61,7 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.NewUserRequest) (*
 		Email: req.Email,
 	}
 	server.users[req.Id] = user
+	publishUser(server.users[user.Id])
 	log.Printf("User created: %v", user)
 
 	rsp := &pb.UserResponse{
@@ -40,10 +72,6 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.NewUserRequest) (*
 
 // GetUser retrieves an existing user by ID
 func (server *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
-	// users := map[string]*pb.User{
-	// 	"1": {Id: "1", Name: "Alice", Email: "alice@example.com"},
-	// }
-
 	user, exists := server.users[req.Id]
 	if !exists {
 		return nil, status.Errorf(codes.NotFound, "user not found")
