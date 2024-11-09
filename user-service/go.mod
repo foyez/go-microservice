@@ -1,4 +1,4 @@
-module github.com/foyez/microservice-with-go/user
+module github.com/foyez/go-microservice/user
 
 go 1.23.1
 

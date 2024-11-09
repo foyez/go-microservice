@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/foyez/microservice-with-go/user/pb"
+	"github.com/foyez/go-microservice/user-service/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"

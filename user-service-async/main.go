@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/foyez/microservice-with-go/user/pb"
+	"github.com/foyez/go-microservice/user-async/pb"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

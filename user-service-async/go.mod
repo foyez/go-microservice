@@ -1,3 +1,3 @@
-module github.com/foyez/microservice-with-go/user-async
+module github.com/foyez/go-microservice/user-async
 
 go 1.23.1

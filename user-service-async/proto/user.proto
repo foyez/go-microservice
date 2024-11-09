@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package pb;
 
-option go_package = "github.com/foyez/microservice-with-go/user/pb";
+option go_package = "github.com/foyez/go-microservice/user-async/pb";
 
 message GetUserRequest {
   string id = 1;
