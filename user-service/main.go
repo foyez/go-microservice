@@ -57,7 +57,9 @@ func (server *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 
 func main() {
 	server := &Server{
-		users: make(map[string]*pb.User),
+		users: map[string]*pb.User{
+			"1": {Id: "1", Name: "Alice", Email: "alice@example.com"},
+		},
 	}
 	grpcServer := grpc.NewServer()
 

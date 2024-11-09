@@ -1,3 +1,5 @@
+github.com/foyez/go-microservice/user-service/pb v0.0.0-20241109223457-d39b103ee875 h1:jlLRCdRirgprlKCx7r/TWNu7GPL8n9aqXDb7EL7JNy4=
+github.com/foyez/go-microservice/user-service/pb v0.0.0-20241109223457-d39b103ee875/go.mod h1:knJEsECJS05SUXPLI0adO0hGEJ7p1GSOOlwYEk0JkVA=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=

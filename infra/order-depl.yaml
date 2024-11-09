@@ -35,7 +35,8 @@ metadata:
 spec:
   selector:
     app: order # to connect to pod through label
+  type: NodePort
   ports:
     - protocol: TCP
       port: 6000
-      targetPort: 30080
+      nodePort: 30080
